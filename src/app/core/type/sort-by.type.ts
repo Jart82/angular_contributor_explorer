@@ -1,0 +1,1 @@
+export type SortByType = 'contributions' | 'followers' | 'public_repos' | 'public_gists';
