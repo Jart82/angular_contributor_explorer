@@ -7,6 +7,7 @@ import { Subject } from 'rxjs';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { ContributorQuery } from '../../../core/interface/contributor-query.interface';
 import { Contributor } from '../../../core/interface/contributor.interface';
+import { PaginatedResponse } from '../../../core/interface/paginated-response.interface';
 
 @Component({
   selector: 'app-contributors-list',
@@ -66,12 +67,12 @@ export class ContributorListComponent {
     this.error.set(null);
 
     this.contributorService.getContributors(this.query).subscribe({
-      next: (response) => {
+      next: (response: PaginatedResponse<Contributor>) => {
         this.contributors.set(response.data);
         this.pagination.set(response.pagination);
         this.loading.set(false);
       },
-      error: (error) => {
+      error: (error: any) => {
         this.error.set('Failed to load contributors. Please try again.');
         this.loading.set(false);
         console.error('Error loading contributors:', error);

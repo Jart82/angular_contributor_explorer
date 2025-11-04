@@ -1,6 +1,9 @@
+import { SortByType } from "../type/sort-by.type";
+import { SortOrderType } from "../type/sort-order-type";
+
 export interface ContributorQuery {
-  sortBy?: 'contributions' | 'followers' | 'public_repos' | 'public_gists';
-  sortOrder?: 'asc' | 'desc';
+  sortBy?: SortByType;
+  sortOrder?: SortOrderType;
   search?: string;
   page?: number;
   limit?: number;

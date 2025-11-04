@@ -36,11 +36,36 @@ export class ContributorDetail {
     this.error.set(null);
 
     this.contributorService.getContributorDetails(username).subscribe({
-      next: (contributor) => {
+      next: (contributor: Contributor & any) => {
+        // If backend returns contributionStats with repositories/contributions,
+        // map them to the top-level shape our template expects.
+        const cs = (contributor as any).contributionStats;
+        if (cs) {
+          // map total contributions if missing
+          if ((contributor as any).contributions == null && cs.contributions != null) {
+            (contributor as any).contributions = cs.contributions;
+          }
+
+          // map repositories (attempt a best-effort shape mapping)
+          if ((!(contributor as any).repositories || (contributor as any).repositories.length === 0) && Array.isArray(cs.repositories)) {
+            (contributor as any).repositories = cs.repositories.map((r: any) => ({
+              name: r.name ?? r.repo ?? r.full_name ?? r.repositoryName ?? '',
+              contributions: r.contributions ?? r.count ?? 0,
+            }));
+          }
+        }
+
+        // Ensure repositories is always an array to simplify template checks
+        if (!contributor.repositories) {
+          (contributor as any).repositories = [];
+        }
+
         this.contributor.set(contributor as any);
         this.loading.set(false);
+        // Debug log to inspect payload shape while developing
+        console.debug('Loaded contributor:', contributor);
       },
-      error: (error) => {
+      error: (error: any) => {
         this.error.set('Failed to load contributor details');
         this.loading.set(false);
         console.error('Error loading contributor:', error);
@@ -56,10 +81,10 @@ export class ContributorDetail {
 
     if (this.contributor()) {
       this.contributorService.likeContributor(this.contributor()!.login).subscribe({
-        next: (response) => {
+        next: (response: { liked: boolean; likes: string[] }) => {
           this.isLiked.set(response.liked);
         },
-        error: (error) => {
+        error: (error: any) => {
           console.error('Error toggling like:', error);
         },
       });
